@@ -18,7 +18,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
         return Ok(await childRepository.FindAll());
     }
 
-    [HttpGet("/{childId:int}")]
+    [HttpGet("{childId:int}")]
     public async Task<ActionResult<Child>> GetChildById(int childId)
     {
         var child = await childRepository.FindById(childId);
@@ -36,7 +36,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
         return Ok(childResult);
     }
 
-    [HttpPost("/{childId:int}/activity")]
+    [HttpPost("{childId:int}/activity")]
     public async Task<ActionResult<Child>> AddActivity(int childId, [FromBody] int rewardActivityId)
     {
         var child = await childRepository.FindById(childId);
@@ -48,7 +48,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
         return Ok(child);
     }
 
-    [HttpPost("/{childId:int}/reward")]
+    [HttpPost("{childId:int}/reward")]
     public async Task<ActionResult<Child>> AddReward(int childId, [FromBody] RewardRequest reward)
     {
         RewardActivity? activity = null;
@@ -68,7 +68,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
         return Ok(child);
     }
     
-    [HttpGet("/{childId:int}/reward")]
+    [HttpGet("{childId:int}/reward")]
     public async Task<ActionResult<Child>> GetRewardsByChildId(int childId)
     {
         var child = await childRepository.FindById(childId);
@@ -77,7 +77,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
         return Ok(child.Rewards);
     }
 
-    [HttpPost("/{childId:int)/usage")]
+    [HttpPost("{childId:int}/usage")]
     public async Task<ActionResult<Child>> NoteUsage(int childId, [FromBody] RewardUsageRequest rewardUsage)
     {
         var child = await childRepository.FindById(childId);
