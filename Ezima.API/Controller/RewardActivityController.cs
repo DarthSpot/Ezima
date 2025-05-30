@@ -1,3 +1,4 @@
+using Ezima.API.Authentication;
 using Ezima.API.Model;
 using Ezima.API.Repository;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Ezima.API.Controller;
 
 [Route("api/activity")]
+[Jauthorize]
 [ApiController]
 public class RewardActivityController(ILogger<ChildController> logger, RewardActivityRepository rewardActivityRepository) : ControllerBase
 {

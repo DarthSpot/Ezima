@@ -8,6 +8,7 @@ public class EzimaContext : DbContext
     public DbSet<Reward> Rewards { get; set; }
     public DbSet<RewardActivity> RewardActivities { get; set; }
     public DbSet<RewardUsage> RewardUsages { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

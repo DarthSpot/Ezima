@@ -1,46 +1,65 @@
 using Ezima.API.Model;
+using Ezima.API.Model.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ezima.API.Repository;
 
-public class UserRepository : IRepository<User>
+public class UserRepository(EzimaContext context) : IRepository<User>
 {
-    public Task<IEnumerable<User?>> FindAll()
+    public async Task<IEnumerable<User?>> FindAll()
     {
-        throw new NotImplementedException();
+        return await context.Users.ToListAsync();
     }
 
-    public Task<User?> FindById(int id)
+    public async Task<User?> FindById(int id)
     {
-        throw new NotImplementedException();
+        return await context.Users.Include(x => x.Children).FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public Task<User?> Save(User entity)
+    public async Task<User?> Save(User entity)
     {
-        throw new NotImplementedException();
+        if (entity == null)
+            return null;
+        var user = await context.Users.AddAsync(entity);
+        if (user.State != EntityState.Added)
+            return null;
+        await context.SaveChangesAsync();
+        return user.Entity;
     }
 
-    public Task<bool> Delete(User entity)
+    public async Task<bool> Delete(User entity)
     {
-        throw new NotImplementedException();
+        context.Users.Remove(entity);
+        return await context.SaveChangesAsync() > 0;
     }
 
-    public Task<bool> DeleteById(int id)
+    public async Task<bool> DeleteById(int id)
     {
-        throw new NotImplementedException();
+        var user = await FindById(id);
+        if (user == null)
+            return false;
+        return await Delete(user);
     }
 
-    public Task<User?> Update(User entity)
+    public async Task<User?> Update(User entity)
     {
-        throw new NotImplementedException();
+        context.Users.Update(entity);
+        await context.SaveChangesAsync();
+        return entity;
     }
 
-    public Task Clear()
+    public async Task Clear()
     {
-        throw new NotImplementedException();
+        context.Users.RemoveRange(context.Users);
     }
 
-    public Task<int> Count()
+    public async Task<int> Count()
     {
-        throw new NotImplementedException();
+        return await context.Users.CountAsync(); 
+    }
+
+    public async Task<User?> FindByOAuthId(string oauthId)
+    {
+        return await context.Users.FirstOrDefaultAsync(x => x.OAuthId == oauthId);
     }
 }

@@ -16,18 +16,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.Configure<OAuthSettings>(builder.Configuration.GetSection("OAuthSettings"));
 builder.Services.AddDbContext<EzimaContext>();
-builder.Services.AddTransient<SecurityKeyHelper>();
 builder.Services.AddTransient<ChildRepository>();
+builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<RewardActivityRepository>();
-builder.Services.AddControllers();
-builder.Services.AddSwaggerGen();
+builder.Services.AddTransient<SecurityKeyHelper>();
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = DiscordAuthenticationDefaults.AuthenticationScheme;
     })
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme)
     .AddDiscord()
-    .AddCookie(options =>
+    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
         options.Cookie.Name = "DiscordAuth";
         options.LoginPath = "/login";
@@ -35,10 +35,12 @@ builder.Services.AddAuthentication(options =>
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    })
-    .AddJwtBearer();
+    });
 builder.Services.ConfigureOptions<ConfigureJwtBearerOptions>();
 builder.Services.ConfigureOptions<ConfigureDiscordOptions>();
+builder.Services.AddControllers();
+builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -50,9 +52,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseRouting();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();

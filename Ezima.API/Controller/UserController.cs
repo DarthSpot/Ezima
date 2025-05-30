@@ -22,10 +22,4 @@ public class UserController(ILogger<ChildController> logger, UserRepository user
             return BadRequest();
         return Ok(user);
     }
-    //
-    // [HttpPost("/login")]
-    // public async Task<ActionResult<User>> Login([FromBody] LoginRequest login)
-    // {
-    //     
-    // }
 }

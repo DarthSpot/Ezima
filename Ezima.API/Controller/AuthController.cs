@@ -5,8 +5,10 @@ using AspNet.Security.OAuth.Discord;
 using Ezima.API.Authentication;
 using Ezima.API.Model;
 using Ezima.API.Model.Config;
+using Ezima.API.Repository;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -15,22 +17,15 @@ namespace Ezima.API.Controller;
 
 [ApiController]
 [Route("/api/auth")]
-public class AuthController : ControllerBase
+public class AuthController(SecurityKeyHelper helper, UserRepository userRepository) : ControllerBase
 {
-    private readonly SecurityKeyHelper _helper;
-
-    public AuthController(SecurityKeyHelper helper)
-    {
-        _helper = helper;
-    }
-    
-    [Authorize]
     [HttpGet]
-    public IActionResult GetUserInfo()
+    [Jauthorize]
+    public IActionResult GetAuthInfo()
     {
         var accessToken = HttpContext.User.Claims;
-
-        return Ok();
+        var data = accessToken.Select(x => new { x.Type, x.Value }).ToList();
+        return Ok(data);
     }
 
     [AllowAnonymous]
@@ -51,7 +46,7 @@ public class AuthController : ControllerBase
     {
         Console.WriteLine("Serving JWKs");
 
-        var rsaKey = _helper.PublicRSA;
+        var rsaKey = helper.PublicRSA;
         var rsaParameters = rsaKey.ExportParameters(false);
 
         var jwk = new JsonWebKey
@@ -78,7 +73,8 @@ public class AuthController : ControllerBase
     {
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-        if (!result.Succeeded) return Unauthorized();
+        if (!result.Succeeded) 
+            return Unauthorized();
 
         var claims = result.Principal.Claims.ToList();
         var permissions = new List<string>
@@ -86,6 +82,34 @@ public class AuthController : ControllerBase
             "user-add",
             "user-view"
         };
+        
+        var userId = claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier).Value;
+        var userName = claims.FirstOrDefault(x => x.Type == ClaimTypes.Name).Value;
+        var userMail = claims.FirstOrDefault(x => x.Type == ClaimTypes.Email).Value;
+        if (userId is not null && userName is not null && userMail is not null)
+        {
+            var user = await userRepository.FindByOAuthId(userId);
+            if (user != null)
+            {
+                // Login
+                user.LastActive = DateTime.UtcNow;
+                await userRepository.Save(user);
+            }
+            else
+            {
+                user = new User()
+                {
+                    Username = userName,
+                    OAuthId = userId,
+                    EMail = userMail,
+                    Created = DateTime.UtcNow,
+                    LastActive = DateTime.UtcNow,
+                    FullName = userName,
+                };
+                user = await userRepository.Save(user);
+                claims.Add(new Claim("EzimaUserId", user.Id.ToString()));
+            }
+        }
 
         claims.AddRange(permissions.Select(permission => new Claim("permissions", permission)));
     
@@ -99,7 +123,7 @@ public class AuthController : ControllerBase
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
-        var rsa = _helper.PrivateRSA;
+        var rsa = helper.PrivateRSA;
         var signingCredentials = new SigningCredentials(
             new RsaSecurityKey(rsa),
             SecurityAlgorithms.RsaSha256
