@@ -1,17 +1,12 @@
 using System.Security.Cryptography;
 using Ezima.API.Model.Config;
+using Microsoft.Extensions.Options;
 
 namespace Ezima.API.Authentication;
 
-public class SecurityKeyHelper
+public class SecurityKeyHelper(IOptions<JwtOptions> options)
 {
-    private readonly JwtOptions _options;
-
-    public SecurityKeyHelper(JwtOptions options)
-    {
-        _options = options;
-    }
-
+    private JwtOptions _options = options.Value;
     public RSA PrivateRSA => LoadRsaKey(_options.RsaPrivateKeyLocation);
     public RSA PublicRSA => LoadRsaKey(_options.RsaPublicKeyLocation);
 

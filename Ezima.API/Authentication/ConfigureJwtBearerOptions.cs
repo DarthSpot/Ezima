@@ -5,16 +5,10 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Ezima.API.Authentication;
 
-public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
+public class ConfigureJwtBearerOptions(IOptions<JwtOptions> options, SecurityKeyHelper securityKeyHelper)
+    : IConfigureNamedOptions<JwtBearerOptions>
 {
-    private readonly JwtOptions _options;
-    private readonly SecurityKeyHelper _securityKeyHelper;
-
-    public ConfigureJwtBearerOptions(JwtOptions options, SecurityKeyHelper securityKeyHelper)
-    {
-        _options = options;
-        _securityKeyHelper = securityKeyHelper;
-    }
+    private readonly JwtOptions _options = options.Value;
 
     public void Configure(JwtBearerOptions options)
     {
@@ -26,7 +20,7 @@ public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions
             ValidateIssuerSigningKey = true,
             ValidIssuer = _options.Issuer,
             ValidAudience = _options.Audience,
-            IssuerSigningKey = new RsaSecurityKey(_securityKeyHelper.PublicRSA)
+            IssuerSigningKey = new RsaSecurityKey(securityKeyHelper.PublicRSA)
         };
     }
 
