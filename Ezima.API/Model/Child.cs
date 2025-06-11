@@ -12,4 +12,5 @@ public class Child
     public virtual List<Reward> Rewards { get; set; } = [];
     public virtual List<RewardActivity> RewardActivities { get; set; } = [];
     public virtual List<RewardUsage> RewardUsages { get; set; } = [];
+    public virtual List<User> Parents { get; set; } = [];
 }

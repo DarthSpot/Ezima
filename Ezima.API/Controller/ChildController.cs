@@ -2,25 +2,33 @@ using Ezima.API.Authentication;
 using Ezima.API.Model;
 using Ezima.API.Model.Request;
 using Ezima.API.Repository;
+using Ezima.API.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ezima.API.Controller;
 
 [Route("api/child")]
-[Jauthorize]
+[JWTauthorize]
 [ApiController]
-public class ChildController(ILogger<ChildController> logger, ChildRepository childRepository, RewardActivityRepository rewardActivityRepository)
+public class ChildController(
+    ILogger<ChildController> logger,
+    ChildRepository childRepository,
+    RewardActivityRepository rewardActivityRepository,
+    UserRepository userRepository,
+    IUserInfoService userInfoService)
     : ControllerBase
 {
     private readonly ILogger<ChildController> _logger = logger;
 
     [HttpGet]
+    [JWTauthorize]
     public async Task<ActionResult<IEnumerable<Child>>> ListChildren()
     {
         return Ok(await childRepository.FindAll());
     }
 
     [HttpGet("{childId:int}")]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> GetChildById(int childId)
     {
         var child = await childRepository.FindById(childId);
@@ -30,15 +38,24 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
     }
 
     [HttpPost]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> CreateChild([FromBody] ChildCreationRequest child)
     {
+        var user = await userInfoService.GetUserAsync();
         var childResult = await childRepository.Save(child.ToEntity());
         if (childResult == null)
             return BadRequest();
+        _logger.LogInformation("New child created: {ChildName}", child.Name);
+        if (user != null)
+        {
+            user.Children.Add(childResult);
+            await userRepository.Update(user);
+        }
         return Ok(childResult);
     }
 
     [HttpPost("{childId:int}/activity")]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> AddActivity(int childId, [FromBody] int rewardActivityId)
     {
         var child = await childRepository.FindById(childId);
@@ -51,6 +68,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
     }
 
     [HttpPost("{childId:int}/reward")]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> AddReward(int childId, [FromBody] RewardRequest reward)
     {
         RewardActivity? activity = null;
@@ -71,6 +89,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
     }
     
     [HttpGet("{childId:int}/reward")]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> GetRewardsByChildId(int childId)
     {
         var child = await childRepository.FindById(childId);
@@ -80,6 +99,7 @@ public class ChildController(ILogger<ChildController> logger, ChildRepository ch
     }
 
     [HttpPost("{childId:int}/usage")]
+    [JWTauthorize]
     public async Task<ActionResult<Child>> NoteUsage(int childId, [FromBody] RewardUsageRequest rewardUsage)
     {
         var child = await childRepository.FindById(childId);

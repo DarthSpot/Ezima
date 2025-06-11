@@ -3,6 +3,7 @@ using Ezima.API.Model;
 using Ezima.API.Model.Context;
 using Ezima.API.Model.Request;
 using Ezima.API.Repository;
+using Ezima.API.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,11 +21,14 @@ public class RestChildTest
     {
         var logger = new Mock<ILogger<ChildController>>();
         var context = new EzimaTestContext();
-        context.Database.EnsureCreated();
+        context.Database.EnsureCreatedAsync();
         var childRepo = new ChildRepository(context);
+        var userRepo = new UserRepository(context);
         var rewardRepo = new RewardActivityRepository(context);
+        var userInfoMock = Mock.Of<IUserInfoService>(i => i.GetUserAsync() == Task.FromResult((User)null));
+        
             
-        _controller = new ChildController(logger.Object, childRepo, rewardRepo);
+        _controller = new ChildController(logger.Object, childRepo, rewardRepo, userRepo, userInfoMock);
     }
 
     [Test]

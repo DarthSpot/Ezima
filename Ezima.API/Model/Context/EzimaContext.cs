@@ -14,4 +14,11 @@ public class EzimaContext : DbContext
     {
         optionsBuilder.UseSqlite("Data Source=test.db");
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+            .HasMany(e => e.Children)
+            .WithMany(e => e.Parents);
+    }
 }

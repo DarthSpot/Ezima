@@ -20,12 +20,22 @@ namespace Ezima.API.Controller;
 public class AuthController(SecurityKeyHelper helper, UserRepository userRepository) : ControllerBase
 {
     [HttpGet]
-    [Jauthorize]
-    public IActionResult GetAuthInfo()
+    [JWTauthorize]
+    public ActionResult<UserInfo> GetAuthInfo()
     {
         var accessToken = HttpContext.User.Claims;
-        var data = accessToken.Select(x => new { x.Type, x.Value }).ToList();
-        return Ok(data);
+        var map = accessToken.ToLookup(x => x.Type, x => x.Value)
+            .ToDictionary(x => x.Key, x => x.ToList());
+        
+        var result = new UserInfo();
+        if (map.TryGetValue(EzimaSchema.EZIMA_USER_ID, out var userId))
+            result.Id = userId.Single();
+        if (map.TryGetValue(ClaimTypes.Name, out var userName))
+            result.Name = userName.Single();
+        if (map.TryGetValue("urn:discord:avatar:url", out var oauthId))
+            result.ProfileImageUrl = oauthId.Single();
+        
+        return Ok(result);
     }
 
     [AllowAnonymous]
@@ -74,7 +84,7 @@ public class AuthController(SecurityKeyHelper helper, UserRepository userReposit
         var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         if (!result.Succeeded) 
-            return Unauthorized();
+            return Unauthorized("Authentication failed");
 
         var claims = result.Principal.Claims.ToList();
         var permissions = new List<string>
@@ -93,7 +103,7 @@ public class AuthController(SecurityKeyHelper helper, UserRepository userReposit
             {
                 // Login
                 user.LastActive = DateTime.UtcNow;
-                await userRepository.Save(user);
+                await userRepository.Update(user);
             }
             else
             {
@@ -106,9 +116,10 @@ public class AuthController(SecurityKeyHelper helper, UserRepository userReposit
                     LastActive = DateTime.UtcNow,
                     FullName = userName,
                 };
-                user = await userRepository.Save(user);
-                claims.Add(new Claim("EzimaUserId", user.Id.ToString()));
+                if (await userRepository.Save(user) == null)
+                    return Unauthorized("Could not create user");
             }
+            claims.Add(new Claim(EzimaSchema.EZIMA_USER_ID, user.Id.ToString()));
         }
 
         claims.AddRange(permissions.Select(permission => new Claim("permissions", permission)));
@@ -116,7 +127,17 @@ public class AuthController(SecurityKeyHelper helper, UserRepository userReposit
         // Create JWT token
         var tokenString = EncryptJwtToken(claims);
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return Ok(new { token = tokenString });
+
+        var cookieOptions = new CookieOptions()
+        {
+            HttpOnly = false,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Path = new PathString("/"),
+        };
+        
+        Response.Cookies.Append("access_token", tokenString, cookieOptions);
+        return Redirect("http://localhost:4200/set-token");
     }
 
     private string EncryptJwtToken(List<Claim> claims)

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Ezima.API.Authentication;
 
-public class JauthorizeAttribute : AuthorizeAttribute
+public class JWTauthorizeAttribute : AuthorizeAttribute
 {
-    public JauthorizeAttribute() : base()
+    public JWTauthorizeAttribute() : base()
     {
         AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme;
     }
