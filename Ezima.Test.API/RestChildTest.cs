@@ -15,34 +15,56 @@ namespace Ezima.Test.API;
 public class RestChildTest
 {
     private ChildController _controller;
+    private RewardController _rewardController;
+    private UsageController _usageController;
 
     [SetUp]
-    public void Setup()
+    public async Task Setup()
     {
         var logger = new Mock<ILogger<ChildController>>();
         var context = new EzimaTestContext();
-        context.Database.EnsureCreatedAsync();
+        await context.Database.EnsureCreatedAsync();
         var childRepo = new ChildRepository(context);
         var userRepo = new UserRepository(context);
-        var rewardRepo = new RewardActivityRepository(context);
-        var userInfoMock = Mock.Of<IUserInfoService>(i => i.GetUserAsync() == Task.FromResult((User)null));
-        
+
+        var user = new User()
+        {
+            Id = 1,
+            EMail = "None",
+            FullName = "TestUser",
+            Username = "TestUser",
+            OAuthId = "None"
+        };
+        if ((await userRepo.FindById(user.Id)) == null)
+            await userRepo.Save(user);
+        var rewardActivityRepository = new RewardActivityRepository(context);
+        var rewardRepository = new RewardRepository(context);
+        var usageRepository = new UsageRepository(context);
+        var userScopeService = new EzimaTestScopeService(user.Id, userRepo);
             
-        _controller = new ChildController(logger.Object, childRepo, rewardRepo, userRepo, userInfoMock);
+        _controller = new ChildController(logger.Object, childRepo, rewardActivityRepository, userRepo, userScopeService);
+        _rewardController = new RewardController(userScopeService, rewardActivityRepository, rewardRepository, childRepo);
+        _usageController = new UsageController(userScopeService, usageRepository, childRepo);
+    }
+
+    private async Task<T?> Unwrap<T>(Func<Task<ActionResult<T>>> call)
+    {
+        var result = await call();
+        if (result.Result is not OkObjectResult okResult) 
+            return default;
+        if (okResult.Value == null)
+            return default;
+        return (T)okResult.Value;
     }
 
     [Test]
     // Are you my mommy?
     public async Task GetEmptyChild()
     {
-        var result = await _controller.ListChildren();
+        var result = await Unwrap(_controller.ListChildren);
         Assert.Multiple(() =>
         {
-            Assert.That(result.Result, Is.TypeOf(typeof(OkObjectResult)));
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.Value, Is.InstanceOf(typeof(IEnumerable<Child>)));
-            var children = okResult.Value as IEnumerable<Child>;
-            Assert.That(children, Is.Empty);;
+            Assert.That(result, Is.Empty);;
         });
     }
     
@@ -54,16 +76,12 @@ public class RestChildTest
             Birthday = DateTime.Today,
             Name = "Test"
         };
-        var result = await _controller.CreateChild(request);
+        var child = await Unwrap(() => _controller.CreateChild(request));
         Assert.Multiple(() =>
         {
-            Assert.That(result.Result, Is.TypeOf(typeof(OkObjectResult)));
-            var okResult = result.Result as OkObjectResult;
-            Assert.That(okResult.Value, Is.TypeOf(typeof(Child)));
-            var child = okResult.Value as Child;
+            Assert.That(child, Is.Not.Null);
             Assert.That(child.Birthday, Is.EqualTo(request.Birthday));
             Assert.That(child.Name, Is.EqualTo(request.Name));
-            Assert.That(child.RewardTime, Is.EqualTo(0));
             Assert.That(child.Rewards, Is.Empty);
             Assert.That(child.RewardActivities, Is.Empty);
         });
@@ -77,23 +95,22 @@ public class RestChildTest
             Birthday = DateTime.Today,
             Name = "Test"
         };
-        var result = await _controller.CreateChild(request);
-        var child = (result.Result as OkObjectResult)?.Value as Child ?? throw new Exception();;
+        var child = await Unwrap(() => _controller.CreateChild(request));
         var id = child.Id;
         var reward = new RewardRequest()
         {
             Comment = "Test",
-            Minutes = 30
+            Minutes = 30,
+            ChildrenIds = {id}
         };
-        var rewardResult = await _controller.AddReward(id, reward);
+        var rewardResult = await Unwrap(() => _rewardController.AddReward(reward));
+        var rewardList = await Unwrap(() => _rewardController.GetRewards());
         
         Assert.Multiple(() =>
         {
-            Assert.That(rewardResult.Result, Is.TypeOf(typeof(OkObjectResult)));
-            var rewardEntity = (rewardResult.Result as OkObjectResult).Value as Child ?? throw new Exception();
-            Assert.That(rewardEntity.RewardTime, Is.EqualTo(reward.Minutes));
-            Assert.That(rewardEntity.Rewards, Is.Not.Empty);
-            Assert.That(rewardEntity.Rewards.Single().Comment, Is.EqualTo(reward.Comment));
+            Assert.That(rewardList, Is.Not.Empty);
+            Assert.That(rewardList.Count, Is.EqualTo(1));
+            Assert.That(rewardList.Single().Comment, Is.EqualTo(reward.Comment));
             
         });
     }
@@ -106,26 +123,27 @@ public class RestChildTest
             Birthday = DateTime.Today,
             Name = "Test"
         };
-        var result = await _controller.CreateChild(request);
-        var child = (result.Result as OkObjectResult)?.Value as Child ?? throw new Exception();;
+        var child = await Unwrap(() => _controller.CreateChild(request));
         var id = child.Id;
         var reward = new RewardRequest()
         {
             Comment = "Test",
-            Minutes = 30
+            Minutes = 30,
+            ChildrenIds = {id}
         };
         var repeats = 10;
         for (var i = 0; i < repeats; i++)
-            await _controller.AddReward(id, reward);
+        {
+            var result = await Unwrap(() => _rewardController.AddReward(reward));
+            Assert.That(result, Is.Not.Null);
+        }
 
-        var userResult = await _controller.GetChildById(id);
-        
+        var userResult = await Unwrap(() => _controller.GetChildById(id));
+        var rewardTimeResult = await Unwrap(() => _rewardController.GetTotalRewardTime(id));
         Assert.Multiple(() =>
         {
-            Assert.That(userResult.Result, Is.TypeOf(typeof(OkObjectResult)));;
-            var rewardEntity = (userResult.Result as OkObjectResult).Value as Child;
-            Assert.That(rewardEntity.RewardTime, Is.EqualTo(reward.Minutes * repeats));;
-            Assert.That(rewardEntity.Rewards.Count, Is.EqualTo(repeats));
+            Assert.That(userResult.Rewards.Count, Is.EqualTo(repeats));
+            Assert.That(rewardTimeResult, Is.EqualTo(repeats * reward.Minutes));
         });
     }
     
@@ -143,24 +161,45 @@ public class RestChildTest
         var reward = new RewardRequest()
         {
             Comment = "Test",
-            Minutes = 30
+            Minutes = 30,
+            ChildrenIds = {id}
         };
-        var rewardResult = await _controller.AddReward(id, reward);
+        var rewardResult = await _rewardController.AddReward(reward);
         var usage = new RewardUsageRequest()
         {
             Comment = "Test Usage",
-            Minutes = 10
+            Minutes = 10,
+            ChildrenIds = {id}
         };
-        var usageResult = await _controller.NoteUsage(id, usage);
+        var usageResult = await _usageController.AddNewUsage(usage);
+        var usages = await Unwrap(_usageController.GetAllUsages);
         Assert.Multiple(() =>
         {
-            Assert.That(usageResult.Result, Is.TypeOf(typeof(OkObjectResult)));
-            var okUsageResult = usageResult.Result as OkObjectResult;
-            var child = okUsageResult.Value as Child;
-            Assert.That(child.RewardTime, Is.EqualTo(reward.Minutes - usage.Minutes));
-            Assert.That(child.RewardUsages, Is.Not.Empty);
-            Assert.That(child.RewardUsages.Single().Comment, Is.EqualTo(usage.Comment));;
+            Assert.That(usages, Is.Not.Empty);
+            Assert.That(usages.Single().Comment, Is.EqualTo(usage.Comment));
         });
+    }
+}
+
+public class EzimaTestScopeService : IAuthScopeService
+{
+    private readonly int _defaultUserId;
+    private readonly UserRepository _userRepository;
+
+    public EzimaTestScopeService(int defaultUserId, UserRepository userRepository)
+    {
+        _defaultUserId = defaultUserId;
+        _userRepository = userRepository;
+    }
+
+    public async Task<User> GetUserAsync()
+    {
+        return await _userRepository.FindById(_defaultUserId);
+    }
+
+    public async Task<IUserScope> GetUserScopeAsync()
+    {
+        return new ApiUserScope(await GetUserAsync());
     }
 }
 

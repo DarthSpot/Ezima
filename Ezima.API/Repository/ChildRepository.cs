@@ -26,6 +26,13 @@ public class ChildRepository : IRepository<Child>
             .Include(x => x.RewardUsages)
             .SingleOrDefaultAsync(x => x.Id == id);
     }
+    
+    public async Task<List<Child>> FindAllByUserId(int? userId)
+    {
+        return await _context.Children
+            .Where(x => x.Parents.Any(p => p.Id == userId))
+            .ToListAsync();
+    }
 
     public async Task<Child?> Save(Child entity)
     {

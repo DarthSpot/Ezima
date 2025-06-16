@@ -20,5 +20,14 @@ public class EzimaContext : DbContext
         modelBuilder.Entity<User>()
             .HasMany(e => e.Children)
             .WithMany(e => e.Parents);
+        modelBuilder.Entity<Child>()
+            .HasMany(e => e.Rewards)
+            .WithMany(e => e.Children);
+        modelBuilder.Entity<Child>()
+            .HasMany(e => e.RewardUsages)
+            .WithMany(e => e.Children);
+        modelBuilder.Entity<Child>()
+            .HasMany(e => e.RewardActivities)
+            .WithMany(e => e.Children);
     }
 }

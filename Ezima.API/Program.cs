@@ -6,10 +6,8 @@ using Ezima.API.Model.Config;
 using Ezima.API.Model.Context;
 using Ezima.API.Repository;
 using Ezima.API.Service;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 var corsOrigin = "_ezimaAllowSpecificOrigin";
@@ -34,9 +32,10 @@ builder.Services.AddDbContext<EzimaContext>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<ChildRepository>();
 builder.Services.AddTransient<UserRepository>();
+builder.Services.AddTransient<UsageRepository>();
 builder.Services.AddTransient<RewardActivityRepository>();
 builder.Services.AddTransient<SecurityKeyHelper>();
-builder.Services.AddTransient<IUserInfoService, UserInfoService>();
+builder.Services.AddTransient<IAuthScopeService, AuthScopeService>();
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;

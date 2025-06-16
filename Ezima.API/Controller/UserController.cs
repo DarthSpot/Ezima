@@ -10,7 +10,7 @@ namespace Ezima.API.Controller;
 [Route("api/user")]
 public class UserController(ILogger<ChildController> logger, 
     UserRepository userRepository,
-    IUserInfoService userInfoService) : ControllerBase
+    IAuthScopeService authScopeService) : ControllerBase
 {
     [HttpGet("[controller]")]
     public async Task<ActionResult<IEnumerable<User>>> ListUsers()
@@ -22,7 +22,7 @@ public class UserController(ILogger<ChildController> logger,
     [JWTauthorize]
     public async Task<ActionResult<User>> GetUserById(int id)
     {
-        var userInfo = await userInfoService.GetUserAsync();
+        var userInfo = await authScopeService.GetUserAsync();
         if (userInfo?.Id != id)
             return Unauthorized();
         

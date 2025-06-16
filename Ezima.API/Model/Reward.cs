@@ -8,5 +8,7 @@ public class Reward
     public DateTime IssuedOn { get; set; }
     public RewardActivity? Activity { get; set; } 
     public string Comment { get; set; }
-    public int DefaultMinutes { get; set; }
+    public int Minutes { get; set; }
+
+    public virtual List<Child> Children { get; set; } = [];
 }

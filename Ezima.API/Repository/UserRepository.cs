@@ -13,7 +13,9 @@ public class UserRepository(EzimaContext context) : IRepository<User>
 
     public async Task<User?> FindById(int id)
     {
-        return await context.Users.Include(x => x.Children).FirstOrDefaultAsync(x => x.Id == id);
+        return await context.Users
+            .Include(x => x.Children)
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     public async Task<User?> Save(User entity)

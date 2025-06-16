@@ -15,7 +15,7 @@ public class ChildController(
     ChildRepository childRepository,
     RewardActivityRepository rewardActivityRepository,
     UserRepository userRepository,
-    IUserInfoService userInfoService)
+    IAuthScopeService authScopeService)
     : ControllerBase
 {
     private readonly ILogger<ChildController> _logger = logger;
@@ -39,77 +39,16 @@ public class ChildController(
 
     [HttpPost]
     [JWTauthorize]
-    public async Task<ActionResult<Child>> CreateChild([FromBody] ChildCreationRequest child)
+    public async Task<ActionResult<Child>> CreateChild([FromBody] ChildCreationRequest childRequest)
     {
-        var user = await userInfoService.GetUserAsync();
-        var childResult = await childRepository.Save(child.ToEntity());
+        var user = await authScopeService.GetUserAsync();
+        var child = childRequest.ToEntity();
+        child.Parents.Add(user);
+        var childResult = await childRepository.Save(child);
+        
         if (childResult == null)
             return BadRequest();
         _logger.LogInformation("New child created: {ChildName}", child.Name);
-        if (user != null)
-        {
-            user.Children.Add(childResult);
-            await userRepository.Update(user);
-        }
         return Ok(childResult);
-    }
-
-    [HttpPost("{childId:int}/activity")]
-    [JWTauthorize]
-    public async Task<ActionResult<Child>> AddActivity(int childId, [FromBody] int rewardActivityId)
-    {
-        var child = await childRepository.FindById(childId);
-        var rewardActivity = await rewardActivityRepository.FindById(rewardActivityId);
-        if (child == null || rewardActivity == null)
-            return BadRequest();
-        child.RewardActivities.Add(rewardActivity);
-        await childRepository.Update(child);
-        return Ok(child);
-    }
-
-    [HttpPost("{childId:int}/reward")]
-    [JWTauthorize]
-    public async Task<ActionResult<Child>> AddReward(int childId, [FromBody] RewardRequest reward)
-    {
-        RewardActivity? activity = null;
-        if (reward.ActivityId != null)
-        {
-            activity = await rewardActivityRepository.FindById(reward.ActivityId.Value);
-        }
-        
-        var child = await childRepository.FindById(childId);
-        if (child == null)
-            return BadRequest();
-        var rewardEntity = reward.ToEntity();
-        rewardEntity.Activity = activity;
-        child.Rewards.Add(rewardEntity);
-        child.RewardTime += rewardEntity.DefaultMinutes;
-        await childRepository.Update(child);
-        return Ok(child);
-    }
-    
-    [HttpGet("{childId:int}/reward")]
-    [JWTauthorize]
-    public async Task<ActionResult<Child>> GetRewardsByChildId(int childId)
-    {
-        var child = await childRepository.FindById(childId);
-        if (child == null)
-            return BadRequest();
-        return Ok(child.Rewards);
-    }
-
-    [HttpPost("{childId:int}/usage")]
-    [JWTauthorize]
-    public async Task<ActionResult<Child>> NoteUsage(int childId, [FromBody] RewardUsageRequest rewardUsage)
-    {
-        var child = await childRepository.FindById(childId);
-        if (child == null)
-            return BadRequest();
-
-        var usage = rewardUsage.ToEntity();
-        child.RewardUsages.Add(usage);
-        child.RewardTime -= usage.Minutes;
-        await childRepository.Update(child);
-        return Ok(child);
     }
 }

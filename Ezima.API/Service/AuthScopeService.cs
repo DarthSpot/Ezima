@@ -3,12 +3,12 @@ using Ezima.API.Repository;
 
 namespace Ezima.API.Service;
 
-public class UserInfoService : IUserInfoService
+public class AuthScopeService : IAuthScopeService
 {
     private readonly IHttpContextAccessor _accessor;
     private readonly UserRepository _userRepository;
 
-    public UserInfoService(IHttpContextAccessor accessor, UserRepository userRepository)
+    public AuthScopeService(IHttpContextAccessor accessor, UserRepository userRepository)
     {
         _accessor = accessor;
         _userRepository = userRepository;
@@ -26,9 +26,12 @@ public class UserInfoService : IUserInfoService
             ? await _userRepository.FindById(id)
             : null;
     }
-}
 
-public interface IUserInfoService
-{
-    public Task<User?> GetUserAsync();
+    public async Task<IUserScope> GetUserScopeAsync()
+    {
+        var user = await GetUserAsync();
+        if (user == null)
+            return new InvalidUserScope();
+        return new ApiUserScope(user);
+    }
 }

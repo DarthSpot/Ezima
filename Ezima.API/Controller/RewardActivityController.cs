@@ -1,6 +1,7 @@
 using Ezima.API.Authentication;
 using Ezima.API.Model;
 using Ezima.API.Repository;
+using Ezima.API.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ezima.API.Controller;
@@ -8,7 +9,11 @@ namespace Ezima.API.Controller;
 [Route("api/activity")]
 [JWTauthorize]
 [ApiController]
-public class RewardActivityController(ILogger<ChildController> logger, RewardActivityRepository rewardActivityRepository) : ControllerBase
+public class RewardActivityController(
+    IAuthScopeService scopeService,
+    ILogger<ChildController> logger,
+    RewardActivityRepository rewardActivityRepository,
+    ChildRepository childRepository) : EzimaControllerBase(scopeService)
 {
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RewardActivity>>> FindAll()
@@ -32,5 +37,31 @@ public class RewardActivityController(ILogger<ChildController> logger, RewardAct
         if (result == null)
             return BadRequest();
         return Ok(result);
+    }
+
+    [HttpPut("{activityId:int}")]
+    public async Task<ActionResult<RewardActivity>> UpdateActivity(
+        int activityId,
+        [FromBody] RewardActivity? rewardActivity)
+    {
+        if (rewardActivity == null || rewardActivity.Id != activityId)
+            return BadRequest();
+        var result = await rewardActivityRepository.Update(rewardActivity);
+        if (result == null)
+            return BadRequest();
+        return Ok(result);
+    }
+    
+    [HttpPost("{activityId:int}/child/{childId:int}")]
+    [JWTauthorize]
+    public async Task<ActionResult<Child>> LinkActivity(int childId, int rewardActivityId)
+    {
+        var child = await childRepository.FindById(childId);
+        var rewardActivity = await rewardActivityRepository.FindById(rewardActivityId);
+        if (child == null || rewardActivity == null)
+            return BadRequest();
+        child.RewardActivities.Add(rewardActivity);
+        await childRepository.Update(child);
+        return Ok(child);
     }
 }

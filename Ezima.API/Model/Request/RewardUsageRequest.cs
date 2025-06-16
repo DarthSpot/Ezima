@@ -7,6 +7,8 @@ public class RewardUsageRequest : IEntityRequest<RewardUsage>
     
     public DateTime? UsedOn { get; set; }
     
+    public List<int> ChildrenIds { get; set; } = [];
+    
     
     public RewardUsage ToEntity()
     {
