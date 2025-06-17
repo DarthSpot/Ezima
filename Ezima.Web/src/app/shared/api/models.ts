@@ -4,6 +4,7 @@
 
 export type { Child } from './models/child';
 export type { ChildCreationRequest } from './models/child-creation-request';
+export type { ChildInfo } from './models/child-info';
 export type { Reward } from './models/reward';
 export type { RewardActivity } from './models/reward-activity';
 export type { RewardRequest } from './models/reward-request';
