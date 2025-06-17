@@ -154,6 +154,44 @@
         }
       }
     },
+    "/api/child/infos": {
+      "get": {
+        "tags": [
+          "Child"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChildInfo"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChildInfo"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChildInfo"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/child/{childId}": {
       "get": {
         "tags": [
@@ -1037,6 +1075,24 @@
           "birthday": {
             "type": "string",
             "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChildInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "currentRewardTime": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

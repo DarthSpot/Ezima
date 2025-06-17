@@ -12,13 +12,13 @@ public class UserController(ILogger<ChildController> logger,
     UserRepository userRepository,
     IAuthScopeService authScopeService) : ControllerBase
 {
-    [HttpGet("[controller]")]
+    [HttpGet("")]
     public async Task<ActionResult<IEnumerable<User>>> ListUsers()
     {
         return Ok(await userRepository.FindAll());
     }
     
-    [HttpGet("[controller]/{id:int}")]
+    [HttpGet("{id:int}")]
     [JWTauthorize]
     public async Task<ActionResult<User>> GetUserById(int id)
     {

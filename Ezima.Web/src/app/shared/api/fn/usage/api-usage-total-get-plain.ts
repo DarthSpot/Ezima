@@ -8,13 +8,12 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { User } from '../../models/user';
 
-export interface ApiUserUserGet$Plain$Params {
+export interface ApiUsageTotalGet$Plain$Params {
 }
 
-export function apiUserUserGet$Plain(http: HttpClient, rootUrl: string, params?: ApiUserUserGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<User>>> {
-  const rb = new RequestBuilder(rootUrl, apiUserUserGet$Plain.PATH, 'get');
+export function apiUsageTotalGet$Plain(http: HttpClient, rootUrl: string, params?: ApiUsageTotalGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<number>> {
+  const rb = new RequestBuilder(rootUrl, apiUsageTotalGet$Plain.PATH, 'get');
   if (params) {
   }
 
@@ -23,9 +22,9 @@ export function apiUserUserGet$Plain(http: HttpClient, rootUrl: string, params?:
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Array<User>>;
+      return (r as HttpResponse<any>).clone({ body: parseFloat(String((r as HttpResponse<any>).body)) }) as StrictHttpResponse<number>;
     })
   );
 }
 
-apiUserUserGet$Plain.PATH = '/api/user/User';
+apiUsageTotalGet$Plain.PATH = '/api/usage/total';

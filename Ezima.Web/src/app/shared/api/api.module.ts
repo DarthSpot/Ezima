@@ -8,7 +8,9 @@ import { ApiConfiguration, ApiConfigurationParams } from './api-configuration';
 
 import { AuthApiService } from './services/auth-api.service';
 import { ChildApiService } from './services/child-api.service';
+import { RewardApiService } from './services/reward-api.service';
 import { RewardActivityApiService } from './services/reward-activity-api.service';
+import { UsageApiService } from './services/usage-api.service';
 import { UserApiService } from './services/user-api.service';
 
 /**
@@ -21,7 +23,9 @@ import { UserApiService } from './services/user-api.service';
   providers: [
     AuthApiService,
     ChildApiService,
+    RewardApiService,
     RewardActivityApiService,
+    UsageApiService,
     UserApiService,
     ApiConfiguration
   ],

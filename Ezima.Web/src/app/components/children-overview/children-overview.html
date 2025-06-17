@@ -16,7 +16,7 @@
   @for (child of children; track child) {
     <li>
       <a routerLink="/children/{{child.id}}">
-        <span class="badge">{{child.id}}</span> {{child.name}} <span class="rewardTime">{{child.rewardTime | minutesToHours}}</span>
+        <span class="badge">{{child.id}}</span> {{child.name}} <span class="rewardTime">{{child.currentRewardTime | minutesToHours}}</span>
       </a>
     </li>
   }

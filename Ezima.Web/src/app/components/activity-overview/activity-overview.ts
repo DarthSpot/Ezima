@@ -12,13 +12,17 @@ export class ActivityOverview {
   activities: RewardActivity[] = [];
   activityService = inject(RewardActivityService);
 
-  add(name: string, defaultTime: string) {
+  add(name: string, defaultTime: string, description?: string) {
     name = name.trim();
-    defaultTime = defaultTime.trim();
+    const defaultMinutes = Number(defaultTime.trim());
     if (!name || !defaultTime) {
       return;
     }
-    this.activityService.addActivity(name, defaultTime)
+    this.activityService.addActivity({
+      name: name,
+      defaultMinutes: defaultMinutes,
+      description: description
+    })
       .subscribe(result => {
         this.activities.push(result);
       });

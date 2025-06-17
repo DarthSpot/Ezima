@@ -8,18 +8,15 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Child } from '../../models/child';
 
-export interface ApiChildChildIdActivityPost$Json$Params {
+export interface ApiUsageChildChildIdTotalGet$Json$Params {
   childId: number;
-      body?: number
 }
 
-export function apiChildChildIdActivityPost$Json(http: HttpClient, rootUrl: string, params: ApiChildChildIdActivityPost$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
-  const rb = new RequestBuilder(rootUrl, apiChildChildIdActivityPost$Json.PATH, 'post');
+export function apiUsageChildChildIdTotalGet$Json(http: HttpClient, rootUrl: string, params: ApiUsageChildChildIdTotalGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<number>> {
+  const rb = new RequestBuilder(rootUrl, apiUsageChildChildIdTotalGet$Json.PATH, 'get');
   if (params) {
     rb.path('childId', params.childId, {});
-    rb.body(params.body, 'application/*+json');
   }
 
   return http.request(
@@ -27,9 +24,9 @@ export function apiChildChildIdActivityPost$Json(http: HttpClient, rootUrl: stri
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Child>;
+      return (r as HttpResponse<any>).clone({ body: parseFloat(String((r as HttpResponse<any>).body)) }) as StrictHttpResponse<number>;
     })
   );
 }
 
-apiChildChildIdActivityPost$Json.PATH = '/api/child/{childId}/activity';
+apiUsageChildChildIdTotalGet$Json.PATH = '/api/usage/child/{childId}/total';

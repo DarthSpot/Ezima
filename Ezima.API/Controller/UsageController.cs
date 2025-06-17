@@ -54,7 +54,7 @@ public class UsageController(IAuthScopeService scopeService,
     
     [HttpGet("child/{childId:int}/total")]
     [JWTauthorize]
-    public async Task<ActionResult<List<RewardUsage>>> GetTotalUsageForChild(int childId)
+    public async Task<ActionResult<int>> GetTotalUsageForChild(int childId)
     {
         var user = await scopeService.GetUserScopeAsync();
         if (!user.HasAccessToChild(childId))

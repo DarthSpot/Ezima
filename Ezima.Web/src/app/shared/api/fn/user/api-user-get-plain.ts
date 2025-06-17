@@ -10,16 +10,16 @@ import { RequestBuilder } from '../../request-builder';
 
 import { User } from '../../models/user';
 
-export interface ApiUserUserGet$Json$Params {
+export interface ApiUserGet$Plain$Params {
 }
 
-export function apiUserUserGet$Json(http: HttpClient, rootUrl: string, params?: ApiUserUserGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<User>>> {
-  const rb = new RequestBuilder(rootUrl, apiUserUserGet$Json.PATH, 'get');
+export function apiUserGet$Plain(http: HttpClient, rootUrl: string, params?: ApiUserGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<User>>> {
+  const rb = new RequestBuilder(rootUrl, apiUserGet$Plain.PATH, 'get');
   if (params) {
   }
 
   return http.request(
-    rb.build({ responseType: 'json', accept: 'text/json', context })
+    rb.build({ responseType: 'text', accept: 'text/plain', context })
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
@@ -28,4 +28,4 @@ export function apiUserUserGet$Json(http: HttpClient, rootUrl: string, params?: 
   );
 }
 
-apiUserUserGet$Json.PATH = '/api/user/User';
+apiUserGet$Plain.PATH = '/api/user';

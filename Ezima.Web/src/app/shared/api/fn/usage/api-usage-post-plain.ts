@@ -8,29 +8,27 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Child } from '../../models/child';
+import { RewardUsage } from '../../models/reward-usage';
 import { RewardUsageRequest } from '../../models/reward-usage-request';
 
-export interface ApiChildChildIdUsagePost$Json$Params {
-  childId: number;
+export interface ApiUsagePost$Plain$Params {
       body?: RewardUsageRequest
 }
 
-export function apiChildChildIdUsagePost$Json(http: HttpClient, rootUrl: string, params: ApiChildChildIdUsagePost$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
-  const rb = new RequestBuilder(rootUrl, apiChildChildIdUsagePost$Json.PATH, 'post');
+export function apiUsagePost$Plain(http: HttpClient, rootUrl: string, params?: ApiUsagePost$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardUsage>> {
+  const rb = new RequestBuilder(rootUrl, apiUsagePost$Plain.PATH, 'post');
   if (params) {
-    rb.path('childId', params.childId, {});
     rb.body(params.body, 'application/*+json');
   }
 
   return http.request(
-    rb.build({ responseType: 'json', accept: 'text/json', context })
+    rb.build({ responseType: 'text', accept: 'text/plain', context })
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Child>;
+      return r as StrictHttpResponse<RewardUsage>;
     })
   );
 }
 
-apiChildChildIdUsagePost$Json.PATH = '/api/child/{childId}/usage';
+apiUsagePost$Plain.PATH = '/api/usage';

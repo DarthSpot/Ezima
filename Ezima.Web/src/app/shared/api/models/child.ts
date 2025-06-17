@@ -5,12 +5,13 @@
 import { Reward } from '../models/reward';
 import { RewardActivity } from '../models/reward-activity';
 import { RewardUsage } from '../models/reward-usage';
+import { User } from '../models/user';
 export interface Child {
   birthday: string;
   id?: number;
   name?: string | null;
+  parents?: Array<User> | null;
   rewardActivities?: Array<RewardActivity> | null;
-  rewardTime?: number;
   rewardUsages?: Array<RewardUsage> | null;
   rewards?: Array<Reward> | null;
 }

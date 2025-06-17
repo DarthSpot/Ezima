@@ -8,18 +8,17 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Child } from '../../models/child';
-import { RewardUsageRequest } from '../../models/reward-usage-request';
+import { RewardActivity } from '../../models/reward-activity';
 
-export interface ApiChildChildIdUsagePost$Plain$Params {
-  childId: number;
-      body?: RewardUsageRequest
+export interface ApiActivityActivityIdPut$Plain$Params {
+  activityId: number;
+      body?: RewardActivity
 }
 
-export function apiChildChildIdUsagePost$Plain(http: HttpClient, rootUrl: string, params: ApiChildChildIdUsagePost$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
-  const rb = new RequestBuilder(rootUrl, apiChildChildIdUsagePost$Plain.PATH, 'post');
+export function apiActivityActivityIdPut$Plain(http: HttpClient, rootUrl: string, params: ApiActivityActivityIdPut$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardActivity>> {
+  const rb = new RequestBuilder(rootUrl, apiActivityActivityIdPut$Plain.PATH, 'put');
   if (params) {
-    rb.path('childId', params.childId, {});
+    rb.path('activityId', params.activityId, {});
     rb.body(params.body, 'application/*+json');
   }
 
@@ -28,9 +27,9 @@ export function apiChildChildIdUsagePost$Plain(http: HttpClient, rootUrl: string
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Child>;
+      return r as StrictHttpResponse<RewardActivity>;
     })
   );
 }
 
-apiChildChildIdUsagePost$Plain.PATH = '/api/child/{childId}/usage';
+apiActivityActivityIdPut$Plain.PATH = '/api/activity/{activityId}';

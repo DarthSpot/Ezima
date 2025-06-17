@@ -11,20 +11,32 @@ namespace Ezima.API.Controller;
 [JWTauthorize]
 [ApiController]
 public class ChildController(
+    IAuthScopeService authScopeService,
     ILogger<ChildController> logger,
-    ChildRepository childRepository,
-    RewardActivityRepository rewardActivityRepository,
-    UserRepository userRepository,
-    IAuthScopeService authScopeService)
+    ChildRepository childRepository)
     : ControllerBase
 {
-    private readonly ILogger<ChildController> _logger = logger;
-
     [HttpGet]
     [JWTauthorize]
     public async Task<ActionResult<IEnumerable<Child>>> ListChildren()
     {
-        return Ok(await childRepository.FindAll());
+        var user = await authScopeService.GetUserAsync();
+        return Ok(await childRepository.FindAllByUserId(user.Id));
+    }
+
+    [HttpGet("infos")]
+    [JWTauthorize]
+    public async Task<ActionResult<IEnumerable<ChildInfo>>> ListChildInfos()
+    {
+        var user = await authScopeService.GetUserScopeAsync();
+        var children = await childRepository.FindAllByUserId(user.UserId);
+        var infos = children.Select(x => new ChildInfo()
+        {
+            Id = x.Id,
+            Name = x.Name,
+            CurrentRewardTime = x.Rewards.Sum(r => r.Minutes) - x.RewardUsages.Sum(u => u.Minutes)
+        }).ToList();
+        return Ok(infos);
     }
 
     [HttpGet("{childId:int}")]
@@ -48,7 +60,7 @@ public class ChildController(
         
         if (childResult == null)
             return BadRequest();
-        _logger.LogInformation("New child created: {ChildName}", child.Name);
+        logger.LogInformation("New child created: {ChildName}", child.Name);
         return Ok(childResult);
     }
 }

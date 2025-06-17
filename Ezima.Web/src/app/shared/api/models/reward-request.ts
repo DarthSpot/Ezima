@@ -4,6 +4,7 @@
 
 export interface RewardRequest {
   activityId?: number | null;
+  childrenIds?: Array<number> | null;
   comment?: string | null;
   issuedOn?: string | null;
   minutes?: number;

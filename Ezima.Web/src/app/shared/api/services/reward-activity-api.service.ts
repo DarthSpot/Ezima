@@ -11,6 +11,18 @@ import { BaseService } from '../base-service';
 import { ApiConfiguration } from '../api-configuration';
 import { StrictHttpResponse } from '../strict-http-response';
 
+import { apiActivityActivityIdChildChildIdPost$Json } from '../fn/reward-activity/api-activity-activity-id-child-child-id-post-json';
+import { ApiActivityActivityIdChildChildIdPost$Json$Params } from '../fn/reward-activity/api-activity-activity-id-child-child-id-post-json';
+import { apiActivityActivityIdChildChildIdPost$Plain } from '../fn/reward-activity/api-activity-activity-id-child-child-id-post-plain';
+import { ApiActivityActivityIdChildChildIdPost$Plain$Params } from '../fn/reward-activity/api-activity-activity-id-child-child-id-post-plain';
+import { apiActivityActivityIdGet$Json } from '../fn/reward-activity/api-activity-activity-id-get-json';
+import { ApiActivityActivityIdGet$Json$Params } from '../fn/reward-activity/api-activity-activity-id-get-json';
+import { apiActivityActivityIdGet$Plain } from '../fn/reward-activity/api-activity-activity-id-get-plain';
+import { ApiActivityActivityIdGet$Plain$Params } from '../fn/reward-activity/api-activity-activity-id-get-plain';
+import { apiActivityActivityIdPut$Json } from '../fn/reward-activity/api-activity-activity-id-put-json';
+import { ApiActivityActivityIdPut$Json$Params } from '../fn/reward-activity/api-activity-activity-id-put-json';
+import { apiActivityActivityIdPut$Plain } from '../fn/reward-activity/api-activity-activity-id-put-plain';
+import { ApiActivityActivityIdPut$Plain$Params } from '../fn/reward-activity/api-activity-activity-id-put-plain';
 import { apiActivityGet$Json } from '../fn/reward-activity/api-activity-get-json';
 import { ApiActivityGet$Json$Params } from '../fn/reward-activity/api-activity-get-json';
 import { apiActivityGet$Plain } from '../fn/reward-activity/api-activity-get-plain';
@@ -19,6 +31,7 @@ import { apiActivityPost$Json } from '../fn/reward-activity/api-activity-post-js
 import { ApiActivityPost$Json$Params } from '../fn/reward-activity/api-activity-post-json';
 import { apiActivityPost$Plain } from '../fn/reward-activity/api-activity-post-plain';
 import { ApiActivityPost$Plain$Params } from '../fn/reward-activity/api-activity-post-plain';
+import { Child } from '../models/child';
 import { RewardActivity } from '../models/reward-activity';
 
 @Injectable({ providedIn: 'root' })
@@ -118,6 +131,147 @@ export class RewardActivityApiService extends BaseService {
   apiActivityPost$Json(params?: ApiActivityPost$Json$Params, context?: HttpContext): Observable<RewardActivity> {
     return this.apiActivityPost$Json$Response(params, context).pipe(
       map((r: StrictHttpResponse<RewardActivity>): RewardActivity => r.body)
+    );
+  }
+
+  /** Path part for operation `apiActivityActivityIdGet()` */
+  static readonly ApiActivityActivityIdGetPath = '/api/activity/{activityId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdGet$Plain()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdGet$Plain$Response(params: ApiActivityActivityIdGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardActivity>> {
+    return apiActivityActivityIdGet$Plain(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdGet$Plain$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdGet$Plain(params: ApiActivityActivityIdGet$Plain$Params, context?: HttpContext): Observable<RewardActivity> {
+    return this.apiActivityActivityIdGet$Plain$Response(params, context).pipe(
+      map((r: StrictHttpResponse<RewardActivity>): RewardActivity => r.body)
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdGet$Json()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdGet$Json$Response(params: ApiActivityActivityIdGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardActivity>> {
+    return apiActivityActivityIdGet$Json(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdGet$Json$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdGet$Json(params: ApiActivityActivityIdGet$Json$Params, context?: HttpContext): Observable<RewardActivity> {
+    return this.apiActivityActivityIdGet$Json$Response(params, context).pipe(
+      map((r: StrictHttpResponse<RewardActivity>): RewardActivity => r.body)
+    );
+  }
+
+  /** Path part for operation `apiActivityActivityIdPut()` */
+  static readonly ApiActivityActivityIdPutPath = '/api/activity/{activityId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdPut$Plain()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiActivityActivityIdPut$Plain$Response(params: ApiActivityActivityIdPut$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardActivity>> {
+    return apiActivityActivityIdPut$Plain(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdPut$Plain$Response()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiActivityActivityIdPut$Plain(params: ApiActivityActivityIdPut$Plain$Params, context?: HttpContext): Observable<RewardActivity> {
+    return this.apiActivityActivityIdPut$Plain$Response(params, context).pipe(
+      map((r: StrictHttpResponse<RewardActivity>): RewardActivity => r.body)
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdPut$Json()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiActivityActivityIdPut$Json$Response(params: ApiActivityActivityIdPut$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<RewardActivity>> {
+    return apiActivityActivityIdPut$Json(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdPut$Json$Response()` instead.
+   *
+   * This method sends `application/*+json` and handles request body of type `application/*+json`.
+   */
+  apiActivityActivityIdPut$Json(params: ApiActivityActivityIdPut$Json$Params, context?: HttpContext): Observable<RewardActivity> {
+    return this.apiActivityActivityIdPut$Json$Response(params, context).pipe(
+      map((r: StrictHttpResponse<RewardActivity>): RewardActivity => r.body)
+    );
+  }
+
+  /** Path part for operation `apiActivityActivityIdChildChildIdPost()` */
+  static readonly ApiActivityActivityIdChildChildIdPostPath = '/api/activity/{activityId}/child/{childId}';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdChildChildIdPost$Plain()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdChildChildIdPost$Plain$Response(params: ApiActivityActivityIdChildChildIdPost$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
+    return apiActivityActivityIdChildChildIdPost$Plain(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdChildChildIdPost$Plain$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdChildChildIdPost$Plain(params: ApiActivityActivityIdChildChildIdPost$Plain$Params, context?: HttpContext): Observable<Child> {
+    return this.apiActivityActivityIdChildChildIdPost$Plain$Response(params, context).pipe(
+      map((r: StrictHttpResponse<Child>): Child => r.body)
+    );
+  }
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `apiActivityActivityIdChildChildIdPost$Json()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdChildChildIdPost$Json$Response(params: ApiActivityActivityIdChildChildIdPost$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
+    return apiActivityActivityIdChildChildIdPost$Json(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `apiActivityActivityIdChildChildIdPost$Json$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  apiActivityActivityIdChildChildIdPost$Json(params: ApiActivityActivityIdChildChildIdPost$Json$Params, context?: HttpContext): Observable<Child> {
+    return this.apiActivityActivityIdChildChildIdPost$Json$Response(params, context).pipe(
+      map((r: StrictHttpResponse<Child>): Child => r.body)
     );
   }
 

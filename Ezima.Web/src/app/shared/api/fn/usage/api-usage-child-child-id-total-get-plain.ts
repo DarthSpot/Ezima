@@ -8,19 +8,15 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Child } from '../../models/child';
-import { RewardRequest } from '../../models/reward-request';
 
-export interface ApiChildChildIdRewardPost$Plain$Params {
+export interface ApiUsageChildChildIdTotalGet$Plain$Params {
   childId: number;
-      body?: RewardRequest
 }
 
-export function apiChildChildIdRewardPost$Plain(http: HttpClient, rootUrl: string, params: ApiChildChildIdRewardPost$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
-  const rb = new RequestBuilder(rootUrl, apiChildChildIdRewardPost$Plain.PATH, 'post');
+export function apiUsageChildChildIdTotalGet$Plain(http: HttpClient, rootUrl: string, params: ApiUsageChildChildIdTotalGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<number>> {
+  const rb = new RequestBuilder(rootUrl, apiUsageChildChildIdTotalGet$Plain.PATH, 'get');
   if (params) {
     rb.path('childId', params.childId, {});
-    rb.body(params.body, 'application/*+json');
   }
 
   return http.request(
@@ -28,9 +24,9 @@ export function apiChildChildIdRewardPost$Plain(http: HttpClient, rootUrl: strin
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Child>;
+      return (r as HttpResponse<any>).clone({ body: parseFloat(String((r as HttpResponse<any>).body)) }) as StrictHttpResponse<number>;
     })
   );
 }
 
-apiChildChildIdRewardPost$Plain.PATH = '/api/child/{childId}/reward';
+apiUsageChildChildIdTotalGet$Plain.PATH = '/api/usage/child/{childId}/total';

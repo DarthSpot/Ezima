@@ -1,9 +1,10 @@
-import {inject, Injectable} from '@angular/core';
-import {catchError, Observable, of, tap} from 'rxjs';
-import {Child} from '../shared/api/models/child';
-import {LoggingService} from './logging-service';
-import {ChildCreationRequest} from '../shared/api/models/child-creation-request';
-import {ChildApiService} from '../shared/api/services';
+import { inject, Injectable} from '@angular/core';
+import { catchError, Observable, of, tap} from 'rxjs';
+import { Child } from '../shared/api/models/child';
+import { LoggingService } from './logging-service';
+import { ChildCreationRequest } from '../shared/api/models/child-creation-request';
+import { ChildApiService } from '../shared/api/services';
+import { ChildInfo } from '../shared/api/models/child-info';
 
 @Injectable({
   providedIn: 'root'
@@ -13,11 +14,11 @@ export class ChildService {
   childApiService = inject(ChildApiService);
   constructor() { }
 
-  getChildren(): Observable<Child[]> {
-    return this.childApiService.apiChildGet$Json()
+  getChildren(): Observable<ChildInfo[]> {
+    return this.childApiService.apiChildInfosGet$Json()
       .pipe(
         tap(_ => this.log('fetching children')),
-        catchError(this.handleError<Child[]>('getChildren', []))
+        catchError(this.handleError<ChildInfo[]>('getChildren', []))
       )
   }
 
@@ -59,6 +60,4 @@ export class ChildService {
       return of(result as T);
     };
   }
-
-
 }

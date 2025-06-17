@@ -1,6 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {Child} from '../../shared/api/models/child';
 import {ChildService} from '../../service/child-service';
+import {ChildInfo} from "../../shared/api/models/child-info";
 
 @Component({
   selector: 'app-children-overview',
@@ -10,7 +11,7 @@ import {ChildService} from '../../service/child-service';
 })
 export class ChildrenOverview implements OnInit {
   childService = inject(ChildService);
-  children: Child[] = [];
+  children: ChildInfo[] = [];
 
   ngOnInit(): void {
     this.childService.getChildren()
@@ -25,7 +26,11 @@ export class ChildrenOverview implements OnInit {
       name: name,
       birthday: birthday
     }).subscribe(res => {
-      this.children.push(res)
+      this.children.push({
+        id: res.id,
+        name: res.name,
+        currentRewardTime: 0
+      })
     });
   }
 }

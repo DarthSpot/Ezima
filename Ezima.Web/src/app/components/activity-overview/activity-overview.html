@@ -15,7 +15,7 @@
   @for (activity of activities; track activity) {
     <li>
       <a routerLink="/children/{{activity.id}}">
-        <span class="badge">{{activity.id}}</span> {{activity.name}} <span class="rewardTime">{{activity.minutes | minutesToHours}}</span>
+        <span class="badge">{{activity.id}}</span> {{activity.name}} <span class="rewardTime">{{activity.defaultMinutes | minutesToHours}}</span>
       </a>
     </li>
   }

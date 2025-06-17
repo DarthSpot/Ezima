@@ -8,16 +8,16 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { Child } from '../../models/child';
+import { Reward } from '../../models/reward';
 
-export interface ApiChildChildIdRewardGet$Json$Params {
-  childId: number;
+export interface ApiRewardRewardIdGet$Json$Params {
+  rewardId: number;
 }
 
-export function apiChildChildIdRewardGet$Json(http: HttpClient, rootUrl: string, params: ApiChildChildIdRewardGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Child>> {
-  const rb = new RequestBuilder(rootUrl, apiChildChildIdRewardGet$Json.PATH, 'get');
+export function apiRewardRewardIdGet$Json(http: HttpClient, rootUrl: string, params: ApiRewardRewardIdGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<Reward>> {
+  const rb = new RequestBuilder(rootUrl, apiRewardRewardIdGet$Json.PATH, 'get');
   if (params) {
-    rb.path('childId', params.childId, {});
+    rb.path('rewardId', params.rewardId, {});
   }
 
   return http.request(
@@ -25,9 +25,9 @@ export function apiChildChildIdRewardGet$Json(http: HttpClient, rootUrl: string,
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Child>;
+      return r as StrictHttpResponse<Reward>;
     })
   );
 }
 
-apiChildChildIdRewardGet$Json.PATH = '/api/child/{childId}/reward';
+apiRewardRewardIdGet$Json.PATH = '/api/reward/{rewardId}';

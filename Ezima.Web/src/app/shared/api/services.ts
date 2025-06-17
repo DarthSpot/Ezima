@@ -4,5 +4,7 @@
 
 export { AuthApiService } from './services/auth-api.service';
 export { ChildApiService } from './services/child-api.service';
+export { RewardApiService } from './services/reward-api.service';
 export { RewardActivityApiService } from './services/reward-activity-api.service';
+export { UsageApiService } from './services/usage-api.service';
 export { UserApiService } from './services/user-api.service';

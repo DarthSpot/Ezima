@@ -8,26 +8,24 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { User } from '../../models/user';
+import { Reward } from '../../models/reward';
 
-export interface ApiUserUserIdGet$Json$Params {
-  id: number;
+export interface ApiRewardGet$Plain$Params {
 }
 
-export function apiUserUserIdGet$Json(http: HttpClient, rootUrl: string, params: ApiUserUserIdGet$Json$Params, context?: HttpContext): Observable<StrictHttpResponse<User>> {
-  const rb = new RequestBuilder(rootUrl, apiUserUserIdGet$Json.PATH, 'get');
+export function apiRewardGet$Plain(http: HttpClient, rootUrl: string, params?: ApiRewardGet$Plain$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<Reward>>> {
+  const rb = new RequestBuilder(rootUrl, apiRewardGet$Plain.PATH, 'get');
   if (params) {
-    rb.path('id', params.id, {});
   }
 
   return http.request(
-    rb.build({ responseType: 'json', accept: 'text/json', context })
+    rb.build({ responseType: 'text', accept: 'text/plain', context })
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<User>;
+      return r as StrictHttpResponse<Array<Reward>>;
     })
   );
 }
 
-apiUserUserIdGet$Json.PATH = '/api/user/User/{id}';
+apiRewardGet$Plain.PATH = '/api/reward';

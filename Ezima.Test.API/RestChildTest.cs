@@ -42,7 +42,7 @@ public class RestChildTest
         var usageRepository = new UsageRepository(context);
         var userScopeService = new EzimaTestScopeService(user.Id, userRepo);
             
-        _controller = new ChildController(logger.Object, childRepo, rewardActivityRepository, userRepo, userScopeService);
+        _controller = new ChildController(userScopeService, logger.Object, childRepo);
         _rewardController = new RewardController(userScopeService, rewardActivityRepository, rewardRepository, childRepo);
         _usageController = new UsageController(userScopeService, usageRepository, childRepo);
     }
@@ -158,13 +158,6 @@ public class RestChildTest
         var result = await _controller.CreateChild(request);
         var child = (result.Result as OkObjectResult)?.Value as Child ?? throw new Exception();;
         var id = child.Id;
-        var reward = new RewardRequest()
-        {
-            Comment = "Test",
-            Minutes = 30,
-            ChildrenIds = {id}
-        };
-        var rewardResult = await _rewardController.AddReward(reward);
         var usage = new RewardUsageRequest()
         {
             Comment = "Test Usage",
@@ -173,10 +166,43 @@ public class RestChildTest
         };
         var usageResult = await _usageController.AddNewUsage(usage);
         var usages = await Unwrap(_usageController.GetAllUsages);
+        var usageTotal = await Unwrap(_usageController.GetTotal);
         Assert.Multiple(() =>
         {
             Assert.That(usages, Is.Not.Empty);
             Assert.That(usages.Single().Comment, Is.EqualTo(usage.Comment));
+        });
+    }
+    
+    [Test]
+    public async Task TestMultiUsage()
+    {
+        var request = new ChildCreationRequest()
+        {
+            Birthday = DateTime.Today,
+            Name = "Test"
+        };
+        var child = await Unwrap(() => _controller.CreateChild(request));
+        var id = child.Id;
+        var usage = new RewardUsageRequest()
+        {
+            Comment = "Test Usage",
+            Minutes = 10,
+            ChildrenIds = {id}
+        };
+        var repeats = 10;
+        for (var i = 0; i < repeats; i++)
+        {
+            var result = await Unwrap(() => _usageController.AddNewUsage(usage));
+            Assert.That(result, Is.Not.Null);
+        }
+
+        var userResult = await Unwrap(() => _controller.GetChildById(id));
+        var rewardTimeResult = await Unwrap(() => _usageController.GetTotalUsageForChild(id));
+        Assert.Multiple(() =>
+        {
+            Assert.That(userResult.RewardUsages.Count, Is.EqualTo(repeats));
+            Assert.That(rewardTimeResult, Is.EqualTo(repeats * usage.Minutes));
         });
     }
 }
