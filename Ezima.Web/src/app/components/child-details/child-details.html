@@ -1,0 +1,13 @@
+<div>
+  @if (child == null) {
+    <h2>Waiting...</h2>
+  }
+  @else {
+    <h2>{{child.name | uppercase}}'s Seite</h2>
+    <div>Id: {{child.id}}</div>
+    <div>Name: {{child.name}}</div>
+    <div>Geburtstag: {{child.birthday | date:'dd.MM.yyyy'}}</div>
+
+  }
+  <button type="button" (click)="goBack()">go back</button>
+</div>

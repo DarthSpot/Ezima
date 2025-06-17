@@ -1,0 +1,23 @@
+
+<div>
+  <div>
+    <label for="new-child">Name des Kindes: </label>
+    <input id="new-child" #childName />
+    <label for="new-child">Geburtstag: </label>
+    <input id="new-child" #childBirthday type="date"/>
+  </div>
+
+  <!-- (click) passes input value to add() and then clears the input -->
+  <button type="button" class="add-button" (click)="add(childName.value, childBirthday.value); childName.value=''; childBirthday.value=''">
+    Kind hinzufügen
+  </button>
+</div>
+<ul class="children">
+  @for (child of children; track child) {
+    <li>
+      <a routerLink="/children/{{child.id}}">
+        <span class="badge">{{child.id}}</span> {{child.name}} <span class="rewardTime">{{child.rewardTime | minutesToHours}}</span>
+      </a>
+    </li>
+  }
+</ul>

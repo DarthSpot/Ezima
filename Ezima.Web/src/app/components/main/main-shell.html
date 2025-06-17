@@ -1,0 +1,16 @@
+<div class="container">
+  <nav class="menu">
+    <a routerLink="/welcome">Willkommen</a>
+    @if (isLoggedIn) {
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/activity">E-Belohnungsaktivitäten</a>
+      <a routerLink="/children">Kinder</a>
+      <a routerLink="/rewards">E-Belohnungen</a>
+      <a routerLink="/usage">E-Verbrauch</a>
+      <a><app-user-profile-info></app-user-profile-info></a>
+    } @else {
+      <a href="http://localhost:5044/login">Login</a>
+    }
+  </nav>
+  <router-outlet />
+</div>

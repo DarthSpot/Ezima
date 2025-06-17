@@ -1,0 +1,22 @@
+<div>
+  <div>
+    <label for="new-activity">Aktivitätsbezeichnung: </label>
+    <input id="new-activity" #activityName />
+    <label for="new-activity-default">Standardminuten: </label>
+    <input id="new-activity-default" #activityDefault type="number" value="30"/>
+  </div>
+
+  <!-- (click) passes input value to add() and then clears the input -->
+  <button type="button" class="add-button" (click)="add(activityName.value, activityDefault.value); activityName.value=''; activityDefault.value='30'">
+    Aktivität hinzufügen
+  </button>
+</div>
+<ul class="children">
+  @for (activity of activities; track activity) {
+    <li>
+      <a routerLink="/children/{{activity.id}}">
+        <span class="badge">{{activity.id}}</span> {{activity.name}} <span class="rewardTime">{{activity.minutes | minutesToHours}}</span>
+      </a>
+    </li>
+  }
+</ul>
